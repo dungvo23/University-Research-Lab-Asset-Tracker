@@ -14,7 +14,7 @@
 |---|---|
 | Vo Dang Dung | N24DCCN112 |
 | Pham Huynh Tuong Duy | N24DCCN115 |
-| Nguyen Van Tien Dat | N24DCCN104 |
+| Nguyen Van Tien Dat (Lead) | N24DCCN104 |
 
 ## 📌 Project Status
 
@@ -45,17 +45,17 @@ To design and build a normalized relational database system that manages personn
 
 | # | Section | Status |
 |---|---|---|
-| 1 | **Introduction & Project Scope** — System Objective, Business Rules & Constraints | ✅ Done |
-| 2.1 | **Database Design** — Conceptual Model (ER/EER Diagram) | ✅ Done |
-| 2.2 | **Database Design** — Logical Schema Mapping | 🔄 WIP |
-| 2.3 | **Database Design** — Normalization Verification (1NF → 3NF/BCNF) | ⏳ Not started |
-| 3 | **Data Dictionary** — Tables and attribute metadata | ⏳ Not started |
-| 4.1 | **Database Implementation** — DDL Script (Tables, Views, Indexes, Triggers) | ⏳ Not started |
-| 4.2 | **Database Implementation** — Advanced Queries & Performance Test Cases | ⏳ Not started |
-| 5.1 | **Verification & Security** — Constraint test cases | ⏳ Not started |
-| 5.2 | **Verification & Security** — RBAC definition (GRANT/REVOKE statements) | ⏳ Not started |
+| 1 | **Introduction & Project Scope** — System Objective, Business Rules & Constraints | ✅ |
+| 2.1 | **Database Design** — Conceptual Model (ER/EER Diagram) | ✅ |
+| 2.2 | **Database Design** — Logical Schema Mapping | - |
+| 2.3 | **Database Design** — Normalization Verification (1NF → 3NF/BCNF) | - |
+| 3 | **Data Dictionary** — Tables and attribute metadata | ⏳ |
+| 4.1 | **Database Implementation** — DDL Script (Tables, Views, Indexes, Triggers) | ⏳ |
+| 4.2 | **Database Implementation** — Advanced Queries & Performance Test Cases | ⏳ |
+| 5.1 | **Verification & Security** — Constraint test cases | ⏳ |
+| 5.2 | **Verification & Security** — RBAC definition (GRANT/REVOKE statements) | ⏳ |
 
-**Marked:** ✅ Done · 🔄 WIP · ⏳ Not started
+**Marked:** ✅: Done · - : Work in progress · ⏳: Not started
 
 ---
 
