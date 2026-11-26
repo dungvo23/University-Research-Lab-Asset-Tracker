@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block guest_content %}
+<main style="max-width:650px;margin:35px auto;padding:24px" class="panel">
+<p class="eyebrow">LABTRACK</p><h1>Đăng ký tài khoản</h1>
+<p>Gửi thông tin để Điều hành kiểm tra. Bạn chỉ có thể đăng nhập sau khi yêu cầu được duyệt.</p>
+{% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+<form method="post" class="operation-form" data-busy-form>
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div class="field"><label for="full_name">Họ tên *</label><input id="full_name" name="full_name" maxlength="120" required value="{{ values.get('full_name','') }}" autocomplete="name"></div>
+<div class="field"><label for="email">Email *</label><input type="email" id="email" name="email" maxlength="160" required value="{{ values.get('email','') }}" autocomplete="email"></div>
+<div class="field"><label for="phone">Số điện thoại</label><input id="phone" name="phone" maxlength="20" value="{{ values.get('phone','') }}" autocomplete="tel"></div>
+<div class="field"><label for="person_type">Loại nhân sự *</label><select id="person_type" name="person_type" required><option value="">Chọn loại nhân sự</option>{% for key,label in types.items() %}<option value="{{ key }}" {% if values.get('person_type')==key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label for="identity_code">Mã sinh viên / giảng viên / kỹ thuật viên (cộng tác viên để trống)</label><input id="identity_code" name="identity_code" pattern="[A-Za-z0-9]{1,20}" maxlength="20" value="{{ values.get('identity_code','') }}"><small>Mã do trường/đơn vị cấp, gồm chữ và số. Giữ nguyên số 0 ở đầu.</small></div>
+<div class="field"><label for="home_institution">Trường/đơn vị ngoài trường (cộng tác viên)</label><input id="home_institution" name="home_institution" maxlength="150" value="{{ values.get('home_institution','') }}"></div>
+<div class="field"><label for="password">Mật khẩu *</label><input type="password" id="password" name="password" minlength="8" maxlength="128" required autocomplete="new-password"></div>
+<div class="field"><label for="password_confirm">Nhập lại mật khẩu *</label><input type="password" id="password_confirm" name="password_confirm" minlength="8" maxlength="128" required autocomplete="new-password"></div>
+<button type="submit" class="btn btn-primary btn-wide">Gửi yêu cầu đăng ký</button>
+</form><p style="margin-top:20px"><a href="{{ url_for('login') }}">← Về đăng nhập</a></p>
+</main>
+{% endblock %}

@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import table_grid %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">THÔNG TIN CHI TIẾT</p><h1>{{ title }}</h1><p>{{ description }}</p></div><div class="page-actions">{% for a in actions if not (g.user.get('operator_account_id') and ('/bookings/new' in a.url or '/access?' in a.url)) %}<a href="{{ a.url }}" class="btn btn-primary">+ {{ a.label }}</a>{% endfor %}<a class="btn btn-quiet" href="{{ url_for('dashboard') }}">← Tổng quan</a></div></header>
+<section class="panel"><div class="panel-heading"><h2>Thông tin cơ bản</h2></div><dl class="detail-grid">{% for label,val in properties %}<div><dt>{{ label }}</dt><dd>{{ val|display }}</dd></div>{% endfor %}</dl></section>
+{% if note %}<p class="notice">{{ note }}</p>{% endif %}
+{% for section in sections %}
+<section class="panel table-panel"><div class="panel-heading"><h2>{{ section.title }}</h2></div>
+{% if section.note %}<p class="muted section-note">{{ section.note }}</p>{% endif %}
+{{ table_grid(section.columns,section.rows,section.empty) }}
+</section>
+{% endfor %}
+{% endblock %}

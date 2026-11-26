@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import table_grid, pager, field_widget %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">DANH MỤC DỮ LIỆU</p><h1>{{ title }}</h1><p>{{ description }}</p></div><div class="page-actions">{% for act in actions if not (g.user.get('operator_account_id') and '/bookings/new' in act.url) %}<a class="btn btn-primary" href="{{ act.url }}">+ {{ act.label }}</a>{% endfor %}</div></header>
+{% if request.endpoint == 'bookings' %}<p><a class="btn btn-quiet" href="{{ url_for('equipment_schedule') }}">▦ Xem lịch thiết bị theo ngày</a></p>{% endif %}
+{% if request.endpoint == 'bookings' and g.user.get('operator_account_id') %}{% include '_booking_tabs.html' %}{% endif %}
+{% if request.endpoint == 'chemicals' %}{% include '_chemical_tabs.html' %}{% endif %}
+{% if filters %}<form action="{{ request.path }}" method="get" class="panel filter-panel"><div class="filters">{% for f in filters %}{{ field_widget(f,filter_values,true) }}{% endfor %}</div><div class="filter-actions"><button class="btn btn-primary" type="submit">Áp dụng</button><a href="{{ request.path }}" class="btn btn-quiet">Đặt lại</a></div></form>{% endif %}
+<section class="panel table-panel"><div class="panel-heading"><div><h2>Danh sách</h2><p class="muted">{{ total }} bản ghi phù hợp</p></div><span class="small-label">{{ page }}/{{ pages }}</span></div>
+{{ table_grid(columns,rows,'Không tìm thấy bản ghi với bộ lọc hiện tại. Hãy thử điều kiện khác.') }}
+{{ pager(page,pages,total) }}
+</section>
+{% endblock %}

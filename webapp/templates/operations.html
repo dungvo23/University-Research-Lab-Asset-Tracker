@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import table_grid,pager,field_widget %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">QUẢN LÝ VẬN HÀNH</p><h1>{{ title }}</h1><p>{{ description }}</p></div></header>
+<div class="operation-layout"><section class="panel form-panel"><div class="panel-heading"><h2>Thêm bản ghi</h2></div>
+<form method="post" action="{{ request.path }}" class="operation-form" data-busy-form {% if request.endpoint == 'allocations' %}data-allocation-form{% endif %}>
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+{% for f in fields %}
+{% if request.endpoint=='allocations' and f.name=='asset_id' %}
+<div class="field"><label for="allocation-asset">Tài sản <span class="required">*</span></label>
+<select id="allocation-asset" name="asset_id" required><option value="">Chọn tài sản</option>
+{% for group,label in [('equipment','Thiết bị'),('chemical','Hóa chất')] %}<optgroup label="{{ label }}">
+{% for opt in f.options if opt[0] and ((group=='chemical' and opt[2]) or (group=='equipment' and not opt[2])) %}<option value="{{ opt[0] }}" data-unit="{{ opt[2] }}" data-type="{{ group }}" {% if values.get('asset_id','')|string==opt[0]|string %}selected{% endif %}>{{ opt[1] }}</option>{% endfor %}
+</optgroup>{% endfor %}</select></div>
+{% elif request.endpoint=='allocations' and f.name=='allocated_qty' %}
+<div class="field"><label for="allocation-quantity">Số lượng phân bổ <span class="required">*</span></label><div class="allocation-quantity-wrap"><input id="allocation-quantity" name="allocated_qty" type="number" required min="0.001" step="0.001" value="{{ values.get('allocated_qty','') }}"><span data-allocation-unit-label aria-live="polite">—</span></div><small class="field-help">Thiết bị cố định 1 máy; hóa chất tính theo đơn vị của lô.</small></div>
+{% else %}{{ field_widget(f,values) }}{% endif %}
+{% endfor %}
+{% if request.endpoint == 'allocations' %}<p class="field-help" data-allocation-unit aria-live="polite">Chọn tài sản để xem đơn vị phân bổ.</p>{% endif %}
+<button class="btn btn-primary btn-wide" type="submit">{{ submit }} →</button>
+</form></section>
+<section class="panel table-panel"><div class="panel-heading"><div><h2>Lịch sử ghi nhận</h2><p class="muted">{{ total }} bản ghi</p></div></div>
+{% if filters %}<form method="get" action="{{ request.path }}" class="inline-filter">{% for f in filters %}{{ field_widget(f,request.args,true) }}{% endfor %}<button type="submit" class="btn btn-primary">Lọc</button><a class="btn btn-quiet" href="{{ request.path }}">Bỏ lọc</a></form>{% endif %}
+{{ table_grid(columns,rows) }}{{ pager(page,pages,total) }}
+</section></div>
+{% if allocation_projects is defined %}
+<section class="allocation-projects"><div class="section-heading"><div><p class="eyebrow">TỔNG HỢP PHÂN BỔ</p><h2>Tài sản theo từng đề tài</h2></div></div>
+<p class="muted">Theo bộ lọc phía trên · {{ allocation_projects|length }} đề tài. Số lượng hóa chất tính riêng từng mã lô; phân bổ không trừ tồn kho.</p>
+{% for project in allocation_projects %}
+<article class="panel allocation-project"><header class="allocation-project-heading"><span class="allocation-project-code">Đề tài #{{ project.project_id }}</span><h3><a href="{{ url_for('project_detail',project_id=project.project_id) }}">{{ project.project_name }}</a></h3></header>
+<div class="allocation-category-grid">
+{% for key,label in [('equipment','Thiết bị'),('chemicals','Hóa chất')] %}
+<section class="allocation-category"><h4>{{ label }} <span>{{ project[key]|length }}</span></h4>
+{% for item in project[key] %}<div class="allocation-item"><div><a class="table-link" href="{{ url_for('equipment_detail' if key=='equipment' else 'chemical_detail',asset_id=item.asset_id) }}">{{ item.asset_name }}</a><small>{{ 'Mã thiết bị' if key=='equipment' else 'Mã lô' }} #{{ item.asset_id }} · {{ item.allocation_count }} lần phân bổ</small><small>Gần nhất: {{ item.last_allocated_at|display }}</small></div><strong class="allocation-amount">{{ item.total_allocated_qty|display('total_allocated_qty') }} <span>{{ 'mL' if item.unit and item.unit|lower=='ml' else item.unit }}</span></strong></div>
+{% else %}<p class="muted allocation-category-empty">Chưa phân bổ {{ label|lower }}.</p>{% endfor %}
+</section>{% endfor %}
+</div></article>
+{% else %}<section class="panel"><p class="muted">Chưa có phân bổ phù hợp với bộ lọc.</p></section>{% endfor %}
+</section>
+{% elif grouped %}<section class="panel table-panel"><div class="panel-heading"><h2>Nhóm theo đề tài và từng tài sản</h2></div>{{ table_grid(grouped_columns,grouped) }}</section>{% endif %}
+{% endblock %}

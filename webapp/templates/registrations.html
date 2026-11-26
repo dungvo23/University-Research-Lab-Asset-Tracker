@@ -1,0 +1,12 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import pager %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">ĐIỀU HÀNH</p><h1>Duyệt đăng ký</h1><p>Kiểm tra hồ sơ trước khi cấp quyền Thành viên. Không cấp quyền Điều hành qua đăng ký.</p></div></header>
+<form method="get" class="panel registration-filter"><div class="field"><label for="status">Trạng thái</label><select id="status" name="status">{% for key,label in [('PENDING','Chờ duyệt'),('APPROVED','Đã duyệt'),('REJECTED','Đã từ chối')] %}<option value="{{ key }}" {% if status==key %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div><button class="btn btn-primary">Lọc</button></form>
+<section class="panel table-panel"><div class="panel-heading"><h2>{{ total }} yêu cầu</h2></div>
+<div class="table-scroll"><table class="data-table registration-table"><thead><tr><th>Hồ sơ</th><th>Thông tin xác minh</th><th>Ngày gửi</th><th>Xử lý</th></tr></thead><tbody>
+{% for row in rows %}<tr><td><strong>{{ row.full_name }}</strong><br>{{ row.email }}<br>{{ row.phone or 'Chưa có số điện thoại' }}</td><td>{{ types[row.person_type] }}<br>{% if row.identity_code %}Mã: {{ row.identity_code }}{% else %}Không có mã SV/GV/KT{% endif %}<br>{{ row.home_institution or '' }}</td><td>{{ row.created_at|display }}</td><td>
+{% if row.status=='PENDING' %}<form method="post" class="registration-review" action="{{ url_for('registration.review',request_id=row.request_id) }}" data-busy-form><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><div class="field"><label for="note_{{ row.request_id }}">Ghi chú / lý do từ chối</label><textarea id="note_{{ row.request_id }}" name="note" rows="3" maxlength="500" placeholder="Nhập lý do nếu từ chối yêu cầu"></textarea></div><div class="registration-actions"><button class="btn btn-primary" type="submit" name="decision" value="approve">Duyệt</button> <button class="btn btn-quiet" type="submit" name="decision" value="reject">Từ chối</button></div></form>
+{% else %}{{ 'Đã duyệt' if row.status=='APPROVED' else 'Đã từ chối' }}<br>{{ row.reviewer or '' }} · {{ row.reviewed_at|display }}<br>{{ row.review_note or '' }}{% endif %}
+</td></tr>{% else %}<tr><td colspan="4">Không có yêu cầu ở trạng thái này.</td></tr>{% endfor %}</tbody></table></div>{{ pager(page,pages,total) }}</section>
+{% endblock %}

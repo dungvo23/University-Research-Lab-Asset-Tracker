@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="error-page"><span class="error-code">{{ code }}</span><h1>{{ title }}</h1><p>{{ message }}</p><a href="{{ url_for('dashboard') }}" class="btn btn-primary">Về tổng quan</a></div>
+{% endblock %}
+{% block guest_content %}
+<main class="guest-error"><div class="error-page"><span class="error-code">{{ code }}</span><h1>{{ title }}</h1><p>{{ message }}</p><a href="{{ url_for('login') }}" class="btn btn-primary">Về đăng nhập</a></div></main>
+{% endblock %}

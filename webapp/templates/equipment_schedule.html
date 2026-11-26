@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">LỊCH DÙNG CHUNG</p><h1>Lịch thiết bị theo ngày</h1><p>Mỗi hàng là một thiết bị tại phòng LAB. Khung trống có thể gửi yêu cầu; lịch chờ duyệt cũng đang giữ chỗ.</p></div>{% if may_book %}<a class="btn btn-primary" href="{{ url_for('booking_new') }}">+ Đặt thiết bị</a>{% endif %}</header>
+<form class="panel schedule-filters" method="get">
+ <div class="field"><label for="schedule-day">Ngày xem lịch</label><input id="schedule-day" name="day" type="date" value="{{ day.isoformat() }}" required></div>
+ <div class="field"><label for="schedule-room">Phòng LAB</label><select id="schedule-room" name="room"><option value="">Tất cả phòng</option>{% for value,label in rooms %}<option value="{{ value }}" {% if selected_room|string==value|string %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+ <label class="schedule-hours"><input type="checkbox" name="hours" value="all" {% if all_hours %}checked{% endif %}> Xem đủ 24 giờ</label>
+ <button class="btn btn-primary" type="submit">Xem lịch</button>
+</form>
+<section class="panel schedule-panel">
+ <div class="schedule-toolbar"><div><h2>{{ day.strftime('%d/%m/%Y') }}</h2><p class="muted">{{ devices|length }} thiết bị · {{ busy_count }} lịch giữ chỗ</p></div>
+ <nav class="schedule-navigation" aria-label="Chọn ngày"><a class="btn btn-quiet" href="{{ url_for('equipment_schedule',day=previous.isoformat(),room=selected_room or '',hours='all' if all_hours else '') }}">← Ngày trước</a><a class="btn btn-quiet" href="{{ url_for('equipment_schedule',day=today.isoformat(),room=selected_room or '',hours='all' if all_hours else '') }}">Hôm nay</a><a class="btn btn-quiet" href="{{ url_for('equipment_schedule',day=following.isoformat(),room=selected_room or '',hours='all' if all_hours else '') }}">Ngày sau →</a></nav></div>
+ <div class="schedule-legend"><span><i class="legend-approved"></i>Đã duyệt</span><span><i class="legend-pending"></i>Chờ duyệt · giữ chỗ tạm</span><span><i class="legend-free"></i>Khung trống</span></div>
+ {% if devices %}
+ <div class="schedule-scroll" tabindex="0" aria-label="Lịch theo giờ, có thể cuộn ngang">
+ <div class="schedule-grid" style="--schedule-hours:{{ hour_count }}">
+  <div class="schedule-header"><div class="schedule-device">Phòng LAB / Thiết bị</div><div class="schedule-ticks" style="grid-template-columns:repeat({{ hour_count }},1fr)">{% for hour in hours %}<span>{{ '%02d'|format(hour) }}:00</span>{% endfor %}</div></div>
+  {% for device in devices %}
+  <div class="schedule-row"><div class="schedule-device"><strong>{{ device.room_name }}</strong><a href="{{ url_for('equipment_detail',asset_id=device.asset_id) }}">{{ device.asset_name }}</a><small>{{ device.status|display }}{% if may_book %} · <a href="{{ url_for('booking_new',asset_id=device.asset_id,start_time=day.isoformat()+'T09:00',end_time=day.isoformat()+'T10:00') }}">Đặt lịch</a>{% endif %}</small></div>
+   <div class="schedule-track" {% if may_book %}data-schedule-book data-book-url="{{ url_for('booking_new',asset_id=device.asset_id) }}" data-day="{{ day.isoformat() }}" data-first="{{ first }}" data-last="{{ last }}"{% endif %}>
+    {% for slot in device.slots %}<div class="schedule-slot {{ 'pending' if slot.pending else 'approved' }}" style="left:{{ slot.left }}%;width:{{ slot.width }}%" tabindex="0" title="{{ slot.label }} · {{ slot.start }} → {{ slot.end }}"><strong>{{ slot.short_start }}–{{ slot.short_end }}</strong><small>{{ slot.label }}</small></div>{% endfor %}
+   </div></div>
+  {% endfor %}
+ </div></div>
+ {% else %}<div class="empty"><strong>Không có thiết bị trong phòng đã chọn.</strong></div>{% endif %}
+</section>
+<p class="muted">Giờ Việt Nam (UTC+7). {% if may_book %}Bấm vùng trống để mở form với thiết bị và giờ đã chọn (bước 15 phút).{% endif %} Lịch từ chối không giữ chỗ. Hệ thống kiểm tra trùng giờ lần cuối khi gửi yêu cầu.</p>
+{% endblock %}

@@ -1,0 +1,65 @@
+{% macro table_grid(columns, rows, empty='Chưa có bản ghi phù hợp.') %}
+  {% if rows %}
+  <div class="table-scroll"><table class="data-table">
+    <thead><tr>{% for col in columns %}<th scope="col">{{ col.label }}</th>{% endfor %}{% if rows[0].get('detail_url') %}<th scope="col">Chi tiết</th>{% endif %}{% if rows[0].get('can_manage_booking') %}<th scope="col">Xét duyệt</th>{% endif %}</tr></thead>
+    <tbody>{% for row in rows %}<tr>
+      {% for col in columns %}
+      <td {% if col.key in ['stock_qty','allocated_qty','quantity','total_budget','total_allocated_qty'] %}class="number-cell"{% endif %}>
+        {% set value = row.get(col.key) %}
+        {% if col.key in ['status', 'asset_type', 'certificate_status', 'expiry_label', 'expiry_status'] %}
+          <span class="tag">{{ value|display(col.key) }}</span>
+        {% elif row.get('detail_url') and row.get('link_key') == col.key %}<a class="table-link" href="{{ row.detail_url }}">{{ value|display(col.key) }}</a>
+          {% else %}{{ value|display(col.key) }}{% endif %}
+      </td>{% endfor %}
+      {% if row.get('detail_url') %}<td><a class="table-link" href="{{ row.detail_url }}" aria-label="Xem chi tiết {{ row.get(columns[0].key) }}">Xem <span aria-hidden="true">›</span></a></td>{% endif %}
+      {% if row.get('can_manage_booking') %}<td>{% if row.get('review_url') %}
+      <form method="post" action="{{ row.review_url }}" class="booking-review-form" data-busy-form>
+      <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+      <label class="muted" for="booking_note_{{ row.booking_id }}">Ghi chú / lý do từ chối</label>
+      <textarea id="booking_note_{{ row.booking_id }}" name="note" rows="2" maxlength="500" placeholder="Bắt buộc khi từ chối"></textarea>
+      <div class="registration-actions"><button class="btn btn-primary" type="submit" name="decision" value="approve">Duyệt</button><button class="btn btn-quiet" type="submit" name="decision" value="reject">Từ chối</button></div></form>
+      {% else %}<span class="muted">Đã xử lý</span>{% endif %}</td>{% endif %}
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}
+  <div class="empty"><span class="empty-icon" aria-hidden="true">◇</span><strong>Chưa có dữ liệu</strong><p>{{ empty }}</p></div>
+  {% endif %}
+{% endmacro %}
+
+{% macro pager(page, pages, total) %}
+{% if pages > 1 %}<nav class="pagination" aria-label="Phân trang">
+  <span>{{ total }} bản ghi · Trang {{ page }}/{{ pages }}</span>
+  <div class="pagination-actions">
+   {% if page > 1 %}<a href="{{ page_url(page - 1) }}">← Trước</a>{% else %}<span class="disabled">← Trước</span>{% endif %}
+   {% if page < pages %}<a href="{{ page_url(page + 1) }}">Sau →</a>{% else %}<span class="disabled">Sau →</span>{% endif %}
+  </div>
+</nav>{% endif %}
+{% endmacro %}
+
+{% macro field_widget(field, values, filter_mode=false) %}
+{% set name = field.name %}
+{% set value = values.get(name, '') %}
+<div class="field">
+  <label for="fld_{{ name }}">{{ field.label }}{% if field.required %} <span class="required" aria-hidden="true">*</span>{% endif %}</label>
+  {% if field.kind == 'select' %}
+    <select id="fld_{{ name }}" name="{{ name }}" {% if field.required %}required{% endif %}>
+      {% for opt in field.options %}<option value="{{ opt[0] }}" data-unit="{{ opt[2] if opt|length > 2 else '' }}" {% if value|string == opt[0]|string %}selected{% endif %}>{{ opt[1] }}</option>{% endfor %}
+    </select>
+  {% elif field.kind == 'booking-datetime' %}
+    <div class="booking-time-parts" data-booking-time="{{ name }}">
+      <input type="hidden" id="fld_{{ name }}" name="{{ name }}" value="{{ value }}">
+      <div><label for="fld_{{ name }}_date">Ngày</label><input type="date" id="fld_{{ name }}_date" name="{{ name }}_date" value="{{ value[:10] }}" {% if field.get('min_value') %}min="{{ field.min_value[:10] }}"{% endif %} required></div>
+      <div><label for="fld_{{ name }}_hour">Giờ</label><select id="fld_{{ name }}_hour" name="{{ name }}_hour" required>{% for hour in range(24) %}{% set hour_text = '%02d'|format(hour) %}<option value="{{ hour_text }}" {% if value[11:13]==hour_text %}selected{% endif %}>{{ hour_text }}</option>{% endfor %}</select></div>
+      <div><label for="fld_{{ name }}_minute">Phút</label><select id="fld_{{ name }}_minute" name="{{ name }}_minute" required><option value="">Chọn phút</option>{% for minute in ['00','15','30','45'] %}<option value="{{ minute }}" {% if value[14:16]==minute %}selected{% endif %}>{{ minute }}</option>{% endfor %}</select></div>
+    </div>
+  {% elif field.kind == 'textarea' %}
+    <textarea id="fld_{{ name }}" name="{{ name }}" rows="3" {% if field.required %}required{% endif %} placeholder="{{ field.placeholder }}">{{ value }}</textarea>
+  {% else %}
+    <input id="fld_{{ name }}" name="{{ name }}" type="{{ field.kind if field.kind != 'number' else 'number' }}"
+      value="{{ value }}" placeholder="{{ field.placeholder }}" {% if field.required %}required{% endif %}
+      {% if field.get('step') %}step="{{ field.step }}"{% endif %} {% if field.get('min_value') %}min="{{ field.min_value }}"{% endif %}
+      {% if field.kind == 'number' %}min="0.001" step="0.001" inputmode="decimal"{% endif %}>
+  {% endif %}
+  {% if field.help %}<small class="field-help">{{ field.help }}</small>{% endif %}
+</div>
+{% endmacro %}

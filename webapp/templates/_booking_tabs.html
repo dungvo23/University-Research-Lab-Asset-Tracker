@@ -1,0 +1,3 @@
+<nav class="chemical-tabs" aria-label="Quản lý lịch đặt theo trạng thái">
+{% for key,label in [('PENDING','Chưa duyệt'),('APPROVED','Đã duyệt'),('REJECTED','Đã từ chối'),('','Tất cả')] %}<a class="btn {{ 'btn-primary' if request.args.get('booking_status','')==key else 'btn-quiet' }}" href="{{ url_for('bookings',booking_status=key) }}">{{ label }}</a>{% endfor %}
+</nav><p class="muted">Yêu cầu mới gửi hiển thị trước, lịch cũ phía sau.</p>

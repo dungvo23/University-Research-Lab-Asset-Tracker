@@ -1,0 +1,6 @@
+{% set active_expiry = request.args.get('expiry','valid') %}
+<nav class="chemical-tabs" aria-label="Hạn sử dụng hóa chất">
+{% for key,label in [('valid','Còn hạn'),('expired','Hết hạn')] %}
+<a class="btn {{ 'btn-primary' if active_expiry==key or (key=='valid' and active_expiry=='soon') else 'btn-quiet' }}" href="{{ url_for('chemicals',expiry=key) }}" {% if active_expiry==key %}aria-current="page"{% endif %}>{{ label }}</a>
+{% endfor %}
+</nav>

@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import table_grid %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">CÁC LÔ HÓA CHẤT</p><h1>{{ chemical.asset_name }}</h1><p>Nồng độ: {{ chemical.concentration or 'Không ghi' }} · Cấp nguy hiểm: {{ chemical.hazard_level }} · Đơn vị: {{ chemical.unit }}</p></div><div class="page-actions">{% if g.user.operator %}<a class="btn btn-primary" href="{{ url_for('chemical_replenish',asset_id=request.view_args.asset_id) }}">+ Bổ sung</a>{% endif %}<a class="btn btn-quiet" href="{{ url_for('chemicals',expiry=expiry) }}">← Danh sách hóa chất</a></div></header>
+<nav class="chemical-tabs" aria-label="Các lô theo hạn sử dụng">
+{% for key,label in [('valid','Còn hạn'),('expired','Hết hạn')] %}<a class="btn {{ 'btn-primary' if expiry==key else 'btn-quiet' }}" href="{{ url_for('chemical_lots',asset_id=request.view_args.asset_id,expiry=key) }}">{{ label }}</a>{% endfor %}
+</nav>
+{% if expiry=='expired' %}<p class="notice">Các lô này đã hết hạn, số lượng có thể cấp phát bằng 0. Tồn kho được giữ lại để theo dõi.</p>{% endif %}
+<section class="panel table-panel"><div class="panel-heading"><h2>{{ lots|length }} lô {{ 'hết hạn' if expiry=='expired' else 'còn hạn' }}</h2></div>{{ table_grid(columns,lots,'Chưa có lô hóa chất thuộc nhóm này. Chọn Bổ sung để nhập lô mới.') }}</section>
+<p class="muted">Bấm vào mã lô để xem thông tin và lịch sử từng lần cấp phát{% if not g.user.operator %} cho bạn{% endif %}. Một lô có thể được cấp phát nhiều lần.</p>
+{% endblock %}

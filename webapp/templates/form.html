@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import field_widget %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">THAO TÁC NGHIỆP VỤ</p><h1>{{ title }}</h1><p>{{ description }}</p></div>{% if back %}<a class="btn btn-quiet" href="{{ back }}">← Quay lại</a>{% endif %}</header>
+<div class="form-layout"><section class="panel form-panel">
+{% if error %}<div class="alert alert-error" role="alert">{{ error }}</div>{% endif %}
+<form method="post" action="{{ action }}" class="operation-form" data-busy-form {% if request.endpoint=='booking_new' %}data-booking-time-grid{% endif %} {% if request.endpoint=='dispense_new' %}data-confirm-dispense{% endif %}>
+<input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+{% for field in fields %}{{ field_widget(field,values) }}{% endfor %}
+<div class="form-actions"><button type="submit" class="btn btn-primary">{{ submit }} <span aria-hidden="true">→</span></button>{% if back %}<a class="btn btn-quiet" href="{{ back }}">Hủy</a>{% endif %}</div>
+</form></section>
+{% if note or reservations or eligibility or request.endpoint in ['booking_new','dispense_new'] %}
+<aside class="form-aside"><span class="aside-symbol">ⓘ</span><h3>Thông tin cần biết</h3>
+{% if note %}<p>{{ note }}</p>{% endif %}<p class="muted">CSDL sẽ kiểm tra lần cuối trước khi ghi dữ liệu.</p>
+{% if request.endpoint == 'booking_new' %}
+<section class="live-preview" data-preview-kind="booking" data-preview-url="{{ url_for('booking_preview') }}" aria-live="polite">
+ <h3>Lịch đã có của thiết bị</h3>
+ <p class="preview-message" data-preview-message>Chọn thiết bị để xem các lịch sắp tới.</p>
+ <ul class="reservation-list" data-preview-list></ul>
+</section>
+<noscript>{% if reservations %}<h3>Lịch đã có của thiết bị đã chọn</h3><ul class="reservation-list">{% for b in reservations %}<li>{{ b.start_time|display }} đến {{ b.end_time|display }}</li>{% endfor %}</ul>{% endif %}</noscript>
+{% elif request.endpoint == 'dispense_new' %}
+<section class="live-preview" data-preview-kind="dispense" data-preview-url="{{ url_for('dispense_preview') }}" aria-live="polite">
+ <h3>Kiểm tra tồn kho và chứng chỉ</h3>
+ <p class="preview-message" data-preview-message>Chọn hóa chất và người nhận để xem điều kiện hiện tại.</p>
+ <div data-preview-details></div>
+</section>
+<noscript>{% if eligibility %}<h3>Chứng chỉ người nhận</h3><p>{{ eligibility }}</p>{% endif %}</noscript>
+{% endif %}
+</aside>{% endif %}
+</div>
+{% endblock %}

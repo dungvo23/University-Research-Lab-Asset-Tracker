@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">PHÂN TÍCH & BÁO CÁO</p><h1>Báo cáo SQL</h1><p>12 truy vấn nghiệp vụ và hai view. Kết quả thực tế từ MySQL.</p></div></header>
+<div class="report-grid">{% for key,report in reports.items() %}<a class="report-card" href="{{ url_for('report_detail',key=key) }}"><span class="report-number">{{ key }}</span><strong>{{ report[0] }}</strong><span class="report-arrow">Xem báo cáo →</span></a>{% endfor %}</div>
+{% endblock %}

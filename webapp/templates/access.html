@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% from '_macros.html' import table_grid,pager,field_widget %}
+{% block content %}
+<header class="page-header"><div><p class="eyebrow">AN TOÀN PHÒNG THÍ NGHIỆM</p><h1>Ra vào phòng</h1><p>Mỗi người chỉ được có một lượt vào phòng đang mở tại một thời điểm.</p></div></header>
+{% if not g.user.get('operator_account_id') %}<div class="access-grid">
+<section class="panel form-panel"><div class="panel-heading"><h2>Trạng thái của tôi</h2></div>
+{% if visit %}
+<div class="visit-open"><span class="visit-pulse"></span><strong>Đang ở trong phòng</strong><h3>{{ visit.room_name }}</h3><p>Vào lúc {{ visit.entry_time|display }}</p><p>{{ visit.purpose|default('Không ghi mục đích',true) }}</p></div>
+<form action="{{ url_for('access_checkout',access_id=visit.access_id) }}" method="post" data-busy-form><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="btn btn-primary btn-wide" type="submit">Ghi nhận rời phòng →</button></form>
+{% else %}
+<p class="muted">Bạn chưa có lượt vào phòng nào đang mở.</p>
+<form method="post" action="{{ url_for('access_checkin') }}" data-busy-form class="operation-form"><input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+<div class="field"><label for="room_id">Phòng thí nghiệm <span class="required">*</span></label><select name="room_id" id="room_id" required><option value="">Chọn phòng</option>{% for id,label in rooms %}<option value="{{ id }}" {% if preselected|string == id|string %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+<div class="field"><label for="purpose">Mục đích vào phòng</label><textarea name="purpose" id="purpose" rows="3" maxlength="255"></textarea></div><button class="btn btn-primary btn-wide" type="submit">Ghi nhận vào phòng →</button></form>
+{% endif %}
+</section>
+<aside class="form-aside"><span class="aside-symbol">◎</span><h3>Điều kiện an toàn</h3><p>Hệ thống kiểm tra chứng chỉ đang có hiệu lực dựa trên cấp nguy hiểm của hóa chất lưu tại phòng.</p><p>Các lượt vào/ra ghi nhận bằng thời gian của máy chủ MySQL.</p></aside>
+</div>{% endif %}
+<section class="panel table-panel"><div class="panel-heading"><div><h2>Nhật ký ra vào</h2><p class="muted">{{ total }} lượt</p></div>
+{% if g.user.operator %}<div class="pill-links"><a href="{{ url_for('access',scope='own') }}" {% if not all_history %}class="active"{% endif %}>Của tôi</a><a href="{{ url_for('access',scope='all') }}" {% if all_history %}class="active"{% endif %}>Toàn bộ</a></div>{% endif %}
+</div>
+<form method="get" action="{{ url_for('access') }}" class="inline-filter">
+ <input type="hidden" name="scope" value="{{ 'all' if all_history else 'own' }}">
+ {% for field in history_filters %}{{ field_widget(field,request.args,true) }}{% endfor %}
+ <button type="submit" class="btn btn-primary">Lọc</button>
+ <a href="{{ url_for('access',scope='all' if all_history else 'own') }}" class="btn btn-quiet">Bỏ lọc</a>
+</form>
+{{ table_grid([{'key':'access_id','label':'Mã'},{'key':'full_name','label':'Nhân sự'},{'key':'room_name','label':'Phòng'},{'key':'entry_time','label':'Vào lúc'},{'key':'exit_time','label':'Ra lúc'},{'key':'duration_minutes','label':'Phút (đã đóng)'},{'key':'purpose','label':'Mục đích'}],rows) }}
+{{ pager(page,pages,total) }}
+</section>
+{% endblock %}

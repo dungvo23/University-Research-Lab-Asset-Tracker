@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#103246">
+  <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+  <title>{{ title|default('Hệ thống phòng thí nghiệm') }} | LabTrack</title>
+  <link href="{{ url_for('static', filename='css/app.css', v='allocation-project-cards-20261125') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='js/app.js',v='allocation-project-cards-20261125') }}" defer></script>
+</head>
+<body class="{% if g.user %}app-shell{% else %}guest-shell{% endif %}">
+{% set notice_counts=notification_counts|default({}) %}
+{% if g.user %}
+<button class="mobile-menu" type="button" id="menu-open" aria-label="Mở menu" aria-controls="sidebar" aria-expanded="false">☰</button>
+<div class="drawer-shade" id="drawer-shade" hidden></div>
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><span class="brand-mark" aria-hidden="true">✣</span><span><strong>LabTrack</strong><small>University Operations</small></span></div>
+  <span class="sidebar-heading">KHÔNG GIAN LÀM VIỆC</span>
+  <nav class="side-nav" aria-label="Điều hướng chính">
+    {% set navigation = [
+        ('dashboard','Tổng quan','◫'),('equipment_schedule','Lịch thiết bị theo ngày','▦'),('equipment','Thiết bị','▣'),
+        ('chemicals','Hóa chất','◈'),('rooms','Phòng thí nghiệm','⌂'),('certificates.index','Duyệt chứng chỉ' if g.user.get('operator_account_id') else 'Cập nhật chứng chỉ','✓'),
+        ('projects','Đề tài','◎'),('bookings','Quản lý lịch đặt' if g.user.get('operator_account_id') else 'Lịch của tôi','▤'),
+        ('access','Theo dõi ra vào' if g.user.get('operator_account_id') else 'Ra vào phòng','⇥'),('dispenses','Lịch sử cấp phát','≡')
+    ] %}
+    {% for endpoint, label, symbol in navigation %}
+    <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint or (endpoint=='equipment' and request.endpoint in ['equipment_detail','booking_new']) or (endpoint=='chemicals' and request.endpoint in ['chemical_detail','dispense_new']) or (endpoint=='projects' and request.endpoint == 'project_detail') %}class="selected" aria-current="page"{% endif %}>
+      <span class="nav-icon" aria-hidden="true">{{ symbol }}</span>{{ label }}<span class="notice-dot" data-notice-key="{{ endpoint }}" {% if not notice_counts.get(endpoint,0) %}hidden{% endif %} aria-label="Có mục cần chú ý" title="Có mục cần chú ý"></span></a>
+    {% endfor %}
+    {% if g.user.operator %}
+    <span class="sidebar-heading nav-group">QUẢN LÝ & BÁO CÁO</span>
+    <a href="{{ url_for('registration.requests_list') }}" {% if request.endpoint == 'registration.requests_list' %}class="selected"{% endif %}><span class="nav-icon" aria-hidden="true">✓</span>Duyệt đăng ký<span class="notice-dot" data-notice-key="registration.requests_list" {% if not notice_counts.get('registration.requests_list',0) %}hidden{% endif %} aria-label="Có đăng ký chờ duyệt" title="Có đăng ký chờ duyệt"></span></a>
+    {% for endpoint,label,symbol in [('personnel','Nhân sự & chứng chỉ','♙'),('allocations','Phân bổ tài sản','▥'),('maintenance','Bảo trì thiết bị','⚒'),('reports','Báo cáo','▧')] %}
+    <a href="{{ url_for(endpoint) }}" {% if request.endpoint == endpoint or (endpoint=='personnel' and request.endpoint=='personnel_detail') or (endpoint=='reports' and request.endpoint=='report_detail') %}class="selected" aria-current="page"{% endif %}><span class="nav-icon" aria-hidden="true">{{ symbol }}</span>{{ label }}<span class="notice-dot" data-notice-key="{{ endpoint }}" {% if not notice_counts.get(endpoint,0) %}hidden{% endif %} aria-label="Có mục cần chú ý" title="Có mục cần chú ý"></span></a>
+    {% endfor %}
+    {% endif %}
+  </nav>
+  <div class="sidebar-footer"><span class="server-dot"></span> Dữ liệu từ MySQL <span class="footer-version">INT1313</span></div>
+</aside>
+<div class="workspace">
+  <header class="topbar">
+   <div class="breadcrumb"><span>Quản lý phòng thí nghiệm</span><span class="crumb-sep">/</span><strong>{{ title|default('Tổng quan') }}</strong></div>
+   <div class="identity">
+    <a class="identity-name" href="{{ url_for('profile') }}"><span class="avatar">{{ g.user.full_name[0]|upper }}</span><span class="identity-text"><strong>{{ g.user.full_name }}<span class="notice-dot" data-notice-key="profile" {% if not notice_counts.get('profile',0) %}hidden{% endif %} aria-label="Có kết quả đăng ký"></span></strong><small>{{ 'Điều hành' if g.user.operator else 'Thành viên' }}</small></span></a>
+    <form method="post" action="{{ url_for('logout') }}" class="logout-form"><input type="hidden" name="_csrf" value="{{ csrf_token() }}"><button class="logout-button" type="submit">Đăng xuất</button></form>
+   </div>
+  </header>
+  <main class="main-content" id="main-content">
+   {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}<div aria-live="polite" class="flash-stack">{% for category,msg in messages %}<div class="alert {{ 'alert-success' if category == 'success' else 'alert-error' }}">{{ msg }}</div>{% endfor %}</div>{% endif %}
+   {% endwith %}
+   {% block content %}{% endblock %}
+   <footer class="page-footer">University Research & Lab Asset Tracker <span>•</span> Dữ liệu trực tiếp, múi giờ Việt Nam (UTC+7)</footer>
+  </main>
+</div>
+{% else %}
+{% block guest_content %}{% endblock %}
+{% endif %}
+</body>
+</html>
