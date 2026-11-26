@@ -1,0 +1,78 @@
+INT1313 FINAL - CÀI VÀ CHẠY TRÊN MÁY MỚI
+Bản đóng gói ngày 25/11/2026, lấy từ mã nguồn FINAL hiện tại.
+
+YÊU CẦU
+- Python 3.11 trở lên, MySQL Server 8.0.16 trở lên (đã kiểm tra với 8.0.46).
+- VS Code + extension Python và Python Debugger của Microsoft.
+- MySQL Workbench để tạo database và thực thi SQL.
+- Đây là mã nguồn cần cài môi trường, không phải bộ chạy độc lập kèm MySQL/Python.
+
+1. GIẢI NÉN VÀ CÀI THƯ VIỆN
+Giải nén ZIP, mở thư mục FINAL trong VS Code.
+Ctrl+Shift+P > Python: Create Environment > Venv > chọn Python > chọn requirements.txt.
+Hoặc mở terminal trong FINAL và chạy:
+  py -m venv .venv
+  .venv\Scripts\python.exe -m pip install -r requirements.txt
+Chọn interpreter .venv nếu VS Code hỏi.
+
+2. TẠO DATABASE MỚI TRONG WORKBENCH
+Kết nối MySQL Server của máy bạn bằng tài khoản quản trị.
+Chỉ chạy trên database mới; không import vào database có dữ liệu cần giữ.
+Mở và chạy lần lượt:
+  sql/01_tao_bang.sql
+  sql/02_trigger_view_procedure.sql
+  sql/03_du_lieu_mau.sql
+  sql/04_cau_truc_tai_khoan.sql
+Sau đó tạo tài khoản dịch vụ (thay mật khẩu ví dụ bằng mật khẩu của bạn):
+  CREATE USER 'lab_app'@'%' IDENTIFIED BY 'CHANGE_ME_SERVICE_PASSWORD';
+Nếu đã có tài khoản lab_app, kiểm tra cấu hình hiện có, không xóa tài khoản tùy tiện.
+Chạy tiếp:
+  sql/05_cap_quyen.sql
+  sql/06_tai_khoan_mau.sql
+SQL 07 là các truy vấn xem/báo cáo; SQL 08/09 là kiểm thử, không cần chạy khi khởi động web.
+SQL mẫu được chuẩn bị cho kỳ demo 2026; khi thuyết trình ở thời điểm khác, một số lịch/chứng chỉ
+có thể đã quá hạn. Đây là dữ liệu mẫu, không tự đổi ngày chỉ vì mở ứng dụng.
+
+3. CẤU HÌNH KẾT NỐI
+Copy webapp/.env.example thành webapp/.env, sửa:
+  DB_HOST=127.0.0.1
+  DB_PORT=3306
+  DB_NAME=university_lab_tracker
+  DB_USER=lab_app
+  DB_PASSWORD=mật khẩu dịch vụ đã đặt ở bước 2
+  SECRET_KEY=khóa ngẫu nhiên riêng của máy, ít nhất 32 ký tự
+Cổng 3306 là ví dụ; nhập đúng cổng MySQL đang chạy trên máy bạn.
+SECRET_KEY có thể tạo bằng:
+  .venv\Scripts\python.exe -c "import secrets; print(secrets.token_hex(32))"
+Không chia sẻ webapp/.env thật lên Git hoặc gửi công khai.
+
+4. CHẠY WEB
+Bật MySQL Server trên máy bạn.
+VS Code > Run and Debug > FINAL - Chay web > F5.
+Mở Chrome: http://127.0.0.1:5000
+Hoặc dùng terminal:
+  .venv\Scripts\python.exe -m flask --app webapp/app.py run --host=127.0.0.1 --port=5000 --no-debugger --no-reload
+Dừng bằng Shift+F5 (VS Code) hoặc Ctrl+C (terminal).
+Những lần sau chỉ bật MySQL và chạy web; không chạy lại SQL 01-06.
+
+5. ĐĂNG NHẬP DỮ LIỆU MẪU
+ADMIN độc lập: dh001@gmail.com.
+Thành viên: sv001–sv011@gmail.com; gv001–gv009@gmail.com; ctv001–ctv004@gmail.com.
+Mật khẩu mẫu cho các tài khoản seed: khongnhonua123.
+Đây là mật khẩu web mẫu, không phải mật khẩu root hoặc lab_app trên máy mới.
+Nguyễn Minh Đức: gv009, mã GV009/KT009. Trần Quốc Bảo: gv001, mã GV001/KT001.
+Cộng tác viên ctv không có mã sinh viên/giảng viên/kỹ thuật viên.
+Đăng ký mới, lịch thiết bị và cập nhật chứng chỉ cần ADMIN xác nhận.
+Minh chứng chứng chỉ tùy chọn trong bản beta; khi có file được lưu riêng trong private/certificates.
+
+6. NỘI DUNG GÓI
+- webapp/: Flask, HTML/CSS/JS và .env.example không chứa bí mật.
+- sql/01–09: cấu trúc, trigger/procedure/view, dữ liệu mẫu, phân quyền, truy vấn và kiểm thử.
+- tests/: kiểm thử; chạy thường bằng pytest, kiểm thử MySQL ghi dữ liệu cần server thử riêng.
+- requirements.txt và requirements-test.txt.
+- .vscode/: cấu hình F5 độc lập, không dùng đường dẫn máy chủ sở hữu.
+- SQL_MANIFEST_SHA256.txt: đối chiếu 9 file SQL.
+Không kèm .venv, .env thật, runtime, config mật khẩu, data, logs, private/minh chứng,
+file note sửa báo cáo, note tài khoản, bản xuất hồ sơ, TEST FRONT hoặc Word/PDF báo cáo.
+Không sao chép run_final.py/Bat_MySQL từ máy cũ vì phụ thuộc MySQL portable và junction riêng.
+Dữ liệu phát sinh trên máy gốc không nằm trong ZIP; máy nhận chạy dữ liệu seed từ SQL 03/06.
