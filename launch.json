@@ -1,0 +1,26 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "FINAL - Chay web",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "flask",
+      "python": "${workspaceFolder}/.venv/Scripts/python.exe",
+      "cwd": "${workspaceFolder}",
+      "envFile": "${workspaceFolder}/webapp/.env",
+      "env": {
+        "FLASK_APP": "webapp/app.py"
+      },
+      "args": [
+        "run",
+        "--host=127.0.0.1",
+        "--port=5000",
+        "--no-debugger",
+        "--no-reload"
+      ],
+      "jinja": true,
+      "justMyCode": true
+    }
+  ]
+}

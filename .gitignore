@@ -1,0 +1,6 @@
+.venv/
+webapp/.env
+private/
+__pycache__/
+.pytest_cache/
+*.pyc
