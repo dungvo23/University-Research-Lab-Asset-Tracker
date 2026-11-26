@@ -1,5 +1,5 @@
-INT1313 FINAL - CÀI VÀ CHẠY TRÊN MÁY MỚI
-Bản đóng gói ngày 25/11/2026, lấy từ mã nguồn FINAL hiện tại.
+INT1313 FINAL
+
 
 YÊU CẦU
 - Python 3.11 trở lên, MySQL Server 8.0.16 trở lên (đã kiểm tra với 8.0.46).
@@ -10,9 +10,6 @@ YÊU CẦU
 1. GIẢI NÉN VÀ CÀI THƯ VIỆN
 Giải nén ZIP, mở thư mục FINAL trong VS Code.
 Ctrl+Shift+P > Python: Create Environment > Venv > chọn Python > chọn requirements.txt.
-Hoặc mở terminal trong FINAL và chạy:
-  py -m venv .venv
-  .venv\Scripts\python.exe -m pip install -r requirements.txt
 Chọn interpreter .venv nếu VS Code hỏi.
 
 2. TẠO DATABASE MỚI TRONG WORKBENCH
